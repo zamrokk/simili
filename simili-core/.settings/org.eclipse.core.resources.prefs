@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+encoding//src/com/simili/robot/dynamics/DifferencialDriveDynamics.java=UTF-8
+encoding//src/com/simili/robot/dynamics/UnicycleDriveDynamics.java=UTF-8
+encoding//src/com/simili/robot/state/DifferencialDriveState.java=UTF-8
+encoding//src/com/simili/robot/state/UnicycleDriveState.java=UTF-8
