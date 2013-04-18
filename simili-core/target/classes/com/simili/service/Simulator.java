@@ -1,51 +1,66 @@
 package com.simili.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.sql.Timestamp;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.simili.robot.Robot;
 import com.simili.robot.position.Position2D;
 
 public class Simulator extends Thread {
 
-	private static final Log log = LogFactory.getLog(Simulator.class);
+	private static final Logger log = LoggerFactory.getLogger(Simulator.class);
 
 	private Robot robot = null;
+
+	private Timestamp elapseTime;
+
+	private long start = 0;
 
 	public Simulator(Robot robot) {
 		this.robot = robot;
 	}
 
 	@Override
-	public synchronized void start() {
+	public void run() {
+
+		start = System.currentTimeMillis();
 
 		log.info("Simulation starting...");
 
 		// Infinite loop
-		for (int i = 0; i < 4000; i++) {
+
+		while (!isInterrupted()) {
 			try {
-				sleep(50);
+				sleep((int) robot.getFrequency());
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Simulator has received an interruption.\n", e);
+				return;
 			}
 
 			log.info(" *** Reading data from sensors, refresh position and state ***");
-			Position2D position = (Position2D) robot.updateOdometry();
-
-			log.info("new position : " + position);
+			robot.updateOdometry();
 
 			log.info(" *** Computing input to apply and send instructions ***");
 			robot.computeAndInstructInputs();
 
 		}
 
-		log.info("Simulation finished.");
+	}
 
+	public void cancel() {
+		interrupt();
+		elapseTime = new Timestamp(System.currentTimeMillis() - start);
+		log.warn("Simulation interrupted after " + elapseTime.getTime() + "ms");
 	}
 
 	public Robot getRobot() {
 		return robot;
+	}
+
+	public Timestamp getElapseTime() {
+		return elapseTime;
 	}
 
 }

@@ -8,9 +8,6 @@ package com.simili.robot.state;
  *         <li>v : velocity 
  *         <li>w : angular velocity
  *         
- *         Calculated values :<br>
- *         <li>x_dot : velocity on axis X
- *         <li>y_dot : velocity on axis Y
  * 
  */
 public class UnicycleDriveState implements State {

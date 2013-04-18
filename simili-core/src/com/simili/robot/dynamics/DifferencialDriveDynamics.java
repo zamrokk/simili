@@ -35,14 +35,14 @@ public class DifferencialDriveDynamics implements Dynamics {
 	}
 
 	/**
-	 * Transform differential state (v_right,v_left) to unicycle state (v,w)
+	 * Transform differential state (w_right,w_left) to unicycle state (v,w)
 	 * 
 	 */
 	public UnicycleDriveState differential2unicycle(double v_right,
 			double v_left) {
 
-		double v = this.wheel_radius / 2 * (v_right + v_left);
-		double w = this.wheel_radius / this.wheel_base_length
+		double v = (this.wheel_radius / 2) * (v_right + v_left);
+		double w = (this.wheel_radius / this.wheel_base_length)
 				* (v_right - v_left);
 		return new UnicycleDriveState(v, w);
 	}

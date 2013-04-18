@@ -1,5 +1,6 @@
 package com.simili.robot;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.simili.robot.command.RobotInstructionSet;
@@ -11,7 +12,10 @@ import com.simili.robot.sensor.Sensor;
 import com.simili.robot.state.State;
 import com.simili.world.Object2D;
 
-public abstract class Robot extends Object2D implements DecisionIntelligence {
+public abstract class Robot extends Object2D implements DecisionIntelligence,
+		Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	protected String name;
 
@@ -28,6 +32,10 @@ public abstract class Robot extends Object2D implements DecisionIntelligence {
 
 	public RobotInstructionSet getRobotInstructionSet() {
 		return robotInstructionSet;
+	}
+
+	public Robot() {
+		super();
 	}
 
 	public Robot(String name, State state, Position2D position,
@@ -67,10 +75,8 @@ public abstract class Robot extends Object2D implements DecisionIntelligence {
 	 * state_estimate is updated with the new location and the measured wheel
 	 * encoder tick counts are stored in prev_ticks.
 	 * 
-	 * @return the new estimate position of the robot. Can be used for GUI
-	 *         rendering
 	 */
-	public abstract Position updateOdometry();
+	public abstract void updateOdometry();
 
 	/**
 	 * A B C K search for matrices controlling the robot Computing input to
@@ -78,8 +84,12 @@ public abstract class Robot extends Object2D implements DecisionIntelligence {
 	 */
 	public abstract void computeAndInstructInputs();
 
-	public abstract double getCruiseLinearVelocity() ;
+	public abstract double getCruiseLinearVelocity();
 
-	public abstract double getMaxLinearVelocity() ;
+	public abstract double getMaxLinearVelocity();
+	
+	public abstract double getMaxangularvelocity();
+
+	public abstract double getFrequency();
 
 }

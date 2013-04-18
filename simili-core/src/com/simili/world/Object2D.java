@@ -15,6 +15,9 @@ public class Object2D {
 		this.shapePointList = shapePointList;
 	}
 
+	public Object2D() {
+	}
+
 	public Position2D getCenterPosition() {
 		return centerPosition;
 	}

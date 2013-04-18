@@ -28,12 +28,23 @@ public class GoToGoalBehavior implements Behavior {
 
 	public GoToGoalBehavior(Position position) {
 		name = BEHAVIORS.GO_TO_GOAL;
-		goalPosition = position;
+		this.goalPosition = position;
 		E_k = 0;
 		e_k_1 = 0;
-		Kp = 5;
-		Ki = 0.1;
-		Kd = 0.3;
+		Kp = 1;
+		Ki = 0.5;
+		Kd = 0.1;
+	}
+
+	public GoToGoalBehavior(Position2D goalPosition, double gainKp,
+			double gainKi, double gainKd) {
+		name = BEHAVIORS.GO_TO_GOAL;
+		this.goalPosition = goalPosition;
+		E_k = 0;
+		e_k_1 = 0;
+		this.Kp = gainKp;
+		this.Ki = gainKi;
+		this.Kd = gainKd;
 	}
 
 	@Override
@@ -68,6 +79,7 @@ public class GoToGoalBehavior implements Behavior {
 		// Hint: Use ATAN2 to make sure this stays in [-pi,pi].
 		double e_k = theta_g - position_c.theta;
 		e_k = Math.atan2(Math.sin(e_k), Math.cos(e_k));
+		log.debug("Error in radian is :"+e_k);
 
 		// 3. Calculate PID for the steering angle
 
@@ -85,13 +97,18 @@ public class GoToGoalBehavior implements Behavior {
 		double e_D = (e_k - e_k_1) / delta_t;
 
 		double w = Kp * e_P + Ki * e_I + Kd * e_D;
+		
+		//limitations
+		if(w>0 && w>robot.getMaxangularvelocity()){w=robot.getMaxangularvelocity();};
+		if(w<0 && w<-robot.getMaxangularvelocity()){w=-robot.getMaxangularvelocity();};
 
+		
 		// 4. Save errors for next time step
 		E_k = e_I;
 		e_k_1 = e_k;
 
 		//just has to go at max if possible in function of w
-		double v = robot.getMaxLinearVelocity()/(Math.log(Math.abs(w)+2)+1); 
+		double v = state_g.v ;/// (Math.log(Math.abs(w)+2)+1); 
 
 		log.info(" *** new velocity should be : "+v+" and angular velocity : "+w);
 		
