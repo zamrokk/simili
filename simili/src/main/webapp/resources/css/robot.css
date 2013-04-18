@@ -1,0 +1,9 @@
+.robot {
+	height: 50px;
+	width: 50px;
+}
+
+.robot.img{
+	height: 100%;
+	width: 100%;
+}
