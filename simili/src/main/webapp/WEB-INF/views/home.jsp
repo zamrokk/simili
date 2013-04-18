@@ -25,6 +25,8 @@ rel="stylesheet" type="text/css" />
 
 <h1><img src="${pageContext.request.contextPath}/resources/img/robot-simili.png" height="80px" width="60px">Simili simulator</h1>
 
+<img src="${pageContext.request.contextPath}/resources/img/beta.png" style="position:absolute;top:0;left:0;clear:both;"/>
+
   <div id='outer_container' class="outer_container" >
 		<a class="menu_button" >Choose your robot</a>
 		<ul class="menu_option">
