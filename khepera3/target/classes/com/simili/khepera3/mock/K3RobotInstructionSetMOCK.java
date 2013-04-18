@@ -1,5 +1,6 @@
 package com.simili.khepera3.mock;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,7 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 	private static final Logger log = LoggerFactory
 			.getLogger(K3RobotInstructionSetMOCK.class);
 
+	@JsonIgnore
 	private Khepera3 robot;
 	private World2D world;
 
@@ -37,17 +39,28 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 		case FORCE_SPEED: {
 			String side = arguments[0];
 			double newV = Double.parseDouble(arguments[1]);
+			double realVelocityApplied = 0;
 			try {
-				//search for correct encoder
+				// search for correct encoder
 				for (Sensor sensor : robot.getSensorList()) {
-					if(sensor instanceof K3WheelEncoder && ((K3WheelEncoder)(sensor)).getName().equals(side)){
-						K3WheelEncoder kwe = (K3WheelEncoder)sensor;
-						kwe.updateTicks(newV * (robot.speed_factor/robot.wheel_radius),robot.frequency/1000);
+					if (sensor instanceof K3WheelEncoder
+							&& ((K3WheelEncoder) (sensor)).getName().equals(
+									side)) {
+						K3WheelEncoder kwe = (K3WheelEncoder) sensor;
+						realVelocityApplied = newV
+								* (1
+								- Math.pow(
+										(Math.abs(kwe.getLastAngularVelocity()
+												- newV) / (2 * robot
+												.getMaxangularvelocity())), 2)) * 0.8;
+						kwe.updateTicks(realVelocityApplied,
+								robot.frequency / 1000);
 					}
 				}
-				
+
 				log.debug("MOCK has updated ticks of " + side
-						+ " wheel encoder to velocity : " + (newV * (robot.speed_factor/robot.wheel_radius)));
+						+ " wheel encoder to real angular velocity : "
+						+ realVelocityApplied);
 			} catch (Exception e) {
 				log.error("Cannot force speed", e);
 			}
@@ -68,8 +81,8 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 			for (Sensor sensor : robot.getSensorList()) {
 				if (sensor instanceof K3WheelEncoder
 						&& ((K3WheelEncoder) sensor).getName().equals(side)) {
-						
-					output = ""+((K3WheelEncoder) sensor).currentTick;
+
+					output = "" + ((K3WheelEncoder) sensor).currentTick;
 					log.debug("MOCK has returned from " + side
 							+ " wheel ticks : " + output);
 				}

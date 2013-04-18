@@ -17,27 +17,30 @@ public class SimulatorTest {
 			.getLogger(SimulatorTest.class);
 
 	@Test
-	public void test() {
-		//prepare mock to reply to the robot sensors
+	public void test() throws InterruptedException {
+		// prepare mock to reply to the robot sensors
 		K3RobotInstructionSetMOCK mock = new K3RobotInstructionSetMOCK();
-		
-		Khepera3 robot = new Khepera3(mock,new Position2D(5, 5, 0));
-		
-		//inject robot and physics to the mock
+
+		Khepera3 robot = new Khepera3(mock, new Position2D(5, 5, 0));
+
+		// inject robot and physics to the mock
 		mock.setRobot(robot);
 		mock.setWorld(new World2D(null, null));
-	
+
 		Simulator simulator = new Simulator(robot);
 
 		log.info(Thread.currentThread().getName()
 				+ " is launching simulator...");
+
 		simulator.start();
-		try {
+
+		while (simulator.isAlive()) {
+			//wait 4 s for the simulator  then kill it and wait
+			simulator.join(10000);
+			simulator.cancel();
 			simulator.join();
-		} catch (InterruptedException e) {
-			Assert.fail("Test is ko" + "\n" + e.getMessage() + "\n"
-					+ e.getStackTrace().toString());
 		}
+
 		Assert.assertTrue("Test is ok", true);
 		log.info("Test is ok");
 	}

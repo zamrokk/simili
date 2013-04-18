@@ -33,6 +33,8 @@ public class K3WheelEncoder extends Sensor<Integer> {
 	public Integer currentTick;
 	//last value
 	public Integer lastTick;
+	//last angularVelocity
+	public double lastAngularVelocity;
 
 	public K3WheelEncoder(SIDES name, RobotInstructionSet robotInstructionSet,
 			SIDES side, double wheel_radius, double wheel_base_length,
@@ -77,6 +79,11 @@ public class K3WheelEncoder extends Sensor<Integer> {
 
 	}
 
+	/**
+	 * 
+	 * @param ticks
+	 * @return distance in radian
+	 */
 	public Double ticks2distance(Integer ticks) {
 		// distance =
 		// (ticks*2*pi*wheel_radius)/(wheel_radius*wheel_ticks_per_rev);
@@ -92,6 +99,12 @@ public class K3WheelEncoder extends Sensor<Integer> {
 
 	}
 
+	/**
+	 * 
+	 * @param ticks
+	 * @param ticks_per_rev
+	 * @return radian
+	 */
 	public static Double ticks2distance(Integer ticks, int ticks_per_rev) {
 		// distance =
 		// (ticks*2*pi*wheel_radius)/(wheel_radius*wheel_ticks_per_rev);
@@ -101,6 +114,11 @@ public class K3WheelEncoder extends Sensor<Integer> {
 
 	public void updateTicks(double velocity, double delta_t) {
 		currentTick += distance2ticks(velocity * delta_t);
-		log.debug(name+" tick updated to : "+currentTick);
+		log.debug(name+" tick updated to : "+currentTick+" for effective speed of "+velocity+" rad/s");
+		this.lastAngularVelocity=velocity;
+	}
+
+	public double getLastAngularVelocity() {
+		return this.lastAngularVelocity;
 	}
 }
