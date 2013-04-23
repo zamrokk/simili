@@ -6,6 +6,8 @@ import com.simili.robot.Robot;
 
 public abstract class World {
 
+	
+
 	private List<Robot> robotList;
 
 	private List<Obstacle> obstacleList;
@@ -23,4 +25,12 @@ public abstract class World {
 		return obstacleList;
 	}
 
+	public void setRobotList(List<Robot> robotList) {
+		this.robotList = robotList;
+	}
+
+	public void setObstacleList(List<Obstacle> obstacleList) {
+		this.obstacleList = obstacleList;
+	}
+	
 }

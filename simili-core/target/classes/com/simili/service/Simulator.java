@@ -1,66 +1,100 @@
 package com.simili.service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 
 import com.simili.robot.Robot;
-import com.simili.robot.position.Position2D;
+import com.simili.world.World;
+import com.simili.world.World2D;
 
-public class Simulator extends Thread {
+@Configuration
+public class Simulator {
 
 	private static final Logger log = LoggerFactory.getLogger(Simulator.class);
 
-	private Robot robot = null;
+	private List<Thread> threadList = new ArrayList<Thread>();
+
+	public boolean isAlive;
+
+	private World world;
 
 	private Timestamp elapseTime;
 
 	private long start = 0;
 
-	public Simulator(Robot robot) {
-		this.robot = robot;
+	@Inject
+	private ThreadFactoryWrapper threadFactoryWrapper;
+
+	public ThreadFactoryWrapper getThreadFactoryWrapper() {
+		return threadFactoryWrapper;
 	}
 
-	@Override
-	public void run() {
+	public void setThreadFactoryWrapper(
+			ThreadFactoryWrapper threadFactoryWrapper) {
+		this.threadFactoryWrapper = threadFactoryWrapper;
+	}
+
+	public Simulator() {
+		clear();
+	}
+
+	public Simulator(World world) {
+		this.world = world;
+	}
+
+	public synchronized void run() {
 
 		start = System.currentTimeMillis();
 
-		log.info("Simulation starting...");
-
-		// Infinite loop
-
-		while (!isInterrupted()) {
-			try {
-				sleep((int) robot.getFrequency());
-			} catch (InterruptedException e) {
-				log.error("Simulator has received an interruption.\n", e);
-				return;
+		if (world != null) {
+			
+			log.info("Simulator is starting ...");
+			
+			for (Robot robot : world.getRobotList()) {
+				Thread robotThread = threadFactoryWrapper
+						.newRequestThread(robot);
+				threadList.add(robotThread);
+				robotThread.start();
+				log.info("Robot "+robot.getName()+" is asking to start ...");
 			}
-
-			log.info(" *** Reading data from sensors, refresh position and state ***");
-			robot.updateOdometry();
-
-			log.info(" *** Computing input to apply and send instructions ***");
-			robot.computeAndInstructInputs();
-
+			isAlive = true;
 		}
 
 	}
 
-	public void cancel() {
-		interrupt();
+	public synchronized void cancel() {
+
+		for (Thread thread : threadList) {
+			thread.interrupt();
+		}
+
+		isAlive = false;
+
 		elapseTime = new Timestamp(System.currentTimeMillis() - start);
 		log.warn("Simulation interrupted after " + elapseTime.getTime() + "ms");
 	}
 
-	public Robot getRobot() {
-		return robot;
-	}
-
 	public Timestamp getElapseTime() {
 		return elapseTime;
+	}
+	
+	public World getWorld() {
+		return world;
+	}
+
+	public void setWorld(World world) {
+		this.world = world;
+	}
+
+	public void clear() {
+		this.world = new World2D(null, null);
 	}
 
 }

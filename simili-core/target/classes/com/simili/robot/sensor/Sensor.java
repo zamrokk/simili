@@ -1,12 +1,12 @@
 package com.simili.robot.sensor;
 
-import com.simili.robot.command.RobotInstructionSet;
+import com.simili.robot.Robot;
 
 public abstract class Sensor<T> {
 
 	protected String name;
-	
-	protected RobotInstructionSet robotInstructionSet;
+
+	protected Robot robot;
 
 	protected T value;
 
@@ -27,9 +27,9 @@ public abstract class Sensor<T> {
 	 */
 	public abstract T getLastValue();
 
-	public Sensor(String name, RobotInstructionSet robotInstructionSet ) {
+	public Sensor(Robot robot, String name) {
 		this.name = name;
-		this.robotInstructionSet = robotInstructionSet;
+		this.robot = robot;
 	}
 
 	public String getName() {

@@ -1,5 +1,7 @@
 package com.simili.khepera3.mock;
 
+import javax.inject.Inject;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,11 +9,11 @@ import org.slf4j.LoggerFactory;
 import com.simili.khepera3.K3Command;
 import com.simili.khepera3.K3RobotInstructionSet;
 import com.simili.khepera3.K3WheelEncoder;
-import com.simili.khepera3.Khepera3;
+import com.simili.robot.Robot;
 import com.simili.robot.command.Command;
 import com.simili.robot.sensor.Sensor;
-import com.simili.robot.state.DifferencialDriveState;
-import com.simili.world.World2D;
+import com.simili.service.Simulator;
+import com.simili.world.World;
 
 public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 
@@ -19,11 +21,13 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 			.getLogger(K3RobotInstructionSetMOCK.class);
 
 	@JsonIgnore
-	private Khepera3 robot;
-	private World2D world;
+	@Inject
+	private Simulator simulator;
 
 	@Override
-	public String sendInstruction(Command command, String... arguments) {
+	public String sendInstruction(Robot robot,Command command, String... arguments) {
+
+		World world = simulator.getWorld();
 
 		String argumentsTxt = "";
 		for (String string : arguments) {
@@ -48,13 +52,13 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 									side)) {
 						K3WheelEncoder kwe = (K3WheelEncoder) sensor;
 						realVelocityApplied = newV
-								* (1
-								- Math.pow(
+								* (1 - Math.pow(
 										(Math.abs(kwe.getLastAngularVelocity()
 												- newV) / (2 * robot
-												.getMaxangularvelocity())), 2)) * 0.8;
+												.getMaxangularvelocity())), 2))
+								* 0.8;
 						kwe.updateTicks(realVelocityApplied,
-								robot.frequency / 1000);
+								robot.getFrequency());
 					}
 				}
 
@@ -93,22 +97,6 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 		}
 
 		return output;
-	}
-
-	public Khepera3 getRobot() {
-		return robot;
-	}
-
-	public void setRobot(Khepera3 robot) {
-		this.robot = robot;
-	}
-
-	public World2D getWorld() {
-		return world;
-	}
-
-	public void setWorld(World2D world) {
-		this.world = world;
 	}
 
 }

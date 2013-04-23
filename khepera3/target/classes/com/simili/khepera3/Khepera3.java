@@ -43,7 +43,7 @@ public class Khepera3 extends Robot {
 
 	private final static double maxAngularVelocity = 2.765; // 2.765rad/s
 
-	public final static double frequency = 50; // en ms
+	public final static double frequency = 0.050; // 50 m
 
 	public double gainKp = 0.1;
 	public double gainKi = 0.2;
@@ -64,11 +64,7 @@ public class Khepera3 extends Robot {
 	private K3ProximitySensor proximitySensor_128;
 	private K3ProximitySensor proximitySensor_180;
 
-	private Position2D goalPosition;
-
-	public Khepera3() {
-		super();
-	}
+	public Position2D goalPosition;
 
 	public Khepera3(RobotInstructionSet robotInstructionSet,
 			Position2D goalPosition) {
@@ -78,30 +74,30 @@ public class Khepera3 extends Robot {
 				new ArrayList<Sensor>(), robotInstructionSet);
 		this.goalPosition = goalPosition;
 
-		wheelEncoderR = new K3WheelEncoder(K3WheelEncoder.SIDES.RIGHT,
-				robotInstructionSet, K3WheelEncoder.SIDES.RIGHT, wheel_radius,
-				wheel_base_length, ticks_per_rev);
-		wheelEncoderL = new K3WheelEncoder(K3WheelEncoder.SIDES.LEFT,
-				robotInstructionSet, K3WheelEncoder.SIDES.LEFT, wheel_radius,
-				wheel_base_length, ticks_per_rev);
-		proximitySensor128 = new K3ProximitySensor(
-				K3ProximitySensor.NAMES.IR128, 128, robotInstructionSet);
-		proximitySensor75 = new K3ProximitySensor(K3ProximitySensor.NAMES.IR75,
-				75, robotInstructionSet);
-		proximitySensor42 = new K3ProximitySensor(K3ProximitySensor.NAMES.IR42,
-				42, robotInstructionSet);
-		proximitySensor13 = new K3ProximitySensor(K3ProximitySensor.NAMES.IR13,
-				13, robotInstructionSet);
-		proximitySensor_13 = new K3ProximitySensor(
-				K3ProximitySensor.NAMES.IR_13, -13, robotInstructionSet);
-		proximitySensor_42 = new K3ProximitySensor(
-				K3ProximitySensor.NAMES.IR_42, -42, robotInstructionSet);
-		proximitySensor_75 = new K3ProximitySensor(
-				K3ProximitySensor.NAMES.IR_75, -75, robotInstructionSet);
-		proximitySensor_128 = new K3ProximitySensor(
-				K3ProximitySensor.NAMES.IR_128, -128, robotInstructionSet);
-		proximitySensor_180 = new K3ProximitySensor(
-				K3ProximitySensor.NAMES.IR_180, -180, robotInstructionSet);
+		wheelEncoderR = new K3WheelEncoder(this, K3WheelEncoder.SIDES.RIGHT,
+				K3WheelEncoder.SIDES.RIGHT, wheel_radius, wheel_base_length,
+				ticks_per_rev);
+		wheelEncoderL = new K3WheelEncoder(this, K3WheelEncoder.SIDES.LEFT,
+				K3WheelEncoder.SIDES.LEFT, wheel_radius, wheel_base_length,
+				ticks_per_rev);
+		proximitySensor128 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR128, 128);
+		proximitySensor75 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR75, 75);
+		proximitySensor42 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR42, 42);
+		proximitySensor13 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR13, 13);
+		proximitySensor_13 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR_13, -13);
+		proximitySensor_42 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR_42, -42);
+		proximitySensor_75 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR_75, -75);
+		proximitySensor_128 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR_128, -128);
+		proximitySensor_180 = new K3ProximitySensor(this,
+				K3ProximitySensor.NAMES.IR_180, -180);
 
 		sensorList.add(wheelEncoderR);
 		sensorList.add(wheelEncoderL);
@@ -129,6 +125,8 @@ public class Khepera3 extends Robot {
 		// Get wheel encoder ticks from the robot
 		int right_ticks = wheelEncoderR.getNewValue();
 		int left_ticks = wheelEncoderL.getNewValue();
+		
+		log.debug("Get wheel encoder ticks from the robot. right_ticks="+right_ticks+"-prev="+prev_right_ticks+",left_ticks="+left_ticks+"-prev="+prev_left_ticks);
 
 		// Compute odometry here
 		double L = wheel_base_length;
@@ -142,12 +140,14 @@ public class Khepera3 extends Robot {
 		double d_left = r_left * wheel_radius;
 
 		double d_center = (d_right + d_left) / 2;
+		
+		log.debug("d_right="+d_right+"m,d_left="+d_left+"m");
 
 		double x_dt = d_center * Math.cos(((Position2D) centerPosition).theta);
 		double y_dt = d_center * Math.sin(((Position2D) centerPosition).theta);
 
 		double theta_dt = (r_right - r_left) / L; // rad
-
+		log.debug("x_dt="+x_dt+"m,y_dt="+y_dt+"m,theta_dt="+theta_dt+"rad");
 		double theta_new = Math.atan2(
 				Math.sin(((Position2D) centerPosition).theta + theta_dt),
 				Math.cos(((Position2D) centerPosition).theta + theta_dt));
@@ -158,11 +158,10 @@ public class Khepera3 extends Robot {
 		centerPosition = new Position2D(x_new, y_new, theta_new);
 
 		// Update new state (v_right,v_left)
-		state = new DifferencialDriveState((r_right / frequency) * 1000,
-				(r_left / frequency) * 1000);
+		state = new DifferencialDriveState(r_right / frequency, r_left
+				/ frequency);
 		unicycleDriveState = ((DifferencialDriveDynamics) dynamics)
-				.differential2unicycle((r_right / frequency) * 1000,
-						(r_left / frequency) * 1000);
+				.differential2unicycle(r_right / frequency, r_left / frequency);
 
 		log.info("*** ODOMETRY ***");
 		log.info("x=" + centerPosition.x + ",y=" + centerPosition.y + ",theta="
@@ -193,7 +192,7 @@ public class Khepera3 extends Robot {
 		// is what i would like,let see what the behavior says ...
 		UnicycleDriveState state = (UnicycleDriveState) chooseDecision()
 				.execute(this, new UnicycleDriveState(cruiseLinearVelocity, 0),
-						frequency / 1000);
+						frequency);
 
 		log.debug("wanted v:" + state.v + ",w:" + state.w);
 
@@ -307,6 +306,33 @@ public class Khepera3 extends Robot {
 	@Override
 	public double getFrequency() {
 		return frequency;
+	}
+
+	@Override
+	public void run() {
+
+		log.info("Robot " + name + " is ON");
+
+		// Infinite loop
+
+		while (!Thread.currentThread().isInterrupted()) {
+			try {
+				Thread.sleep((int) (frequency * 1000));
+			} catch (InterruptedException e) {
+				log.warn("Robot " + name + " has stopped", e);
+				return;
+			}
+
+			log.info("Robot "
+					+ name
+					+ " is reading data from sensors, refresh position and state");
+			updateOdometry();
+
+			log.info("Robot " + name
+					+ " is computing input to apply and sending instructions");
+			computeAndInstructInputs();
+
+		}
 	}
 
 }

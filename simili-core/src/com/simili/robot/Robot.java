@@ -3,50 +3,49 @@ package com.simili.robot;
 import java.io.Serializable;
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import com.simili.robot.command.RobotInstructionSet;
 import com.simili.robot.decision.DecisionIntelligence;
 import com.simili.robot.dynamics.Dynamics;
-import com.simili.robot.position.Position;
 import com.simili.robot.position.Position2D;
 import com.simili.robot.sensor.Sensor;
 import com.simili.robot.state.State;
 import com.simili.world.Object2D;
 
 public abstract class Robot extends Object2D implements DecisionIntelligence,
-		Serializable {
+		Serializable, Runnable {
 
 	private static final long serialVersionUID = 1L;
 
 	protected String name;
 
-	// to inject
 	protected State state;
 
-	// to inject
 	protected Dynamics dynamics;
 
 	protected List<Sensor> sensorList;
 
-	// to inject
+	@JsonIgnore
 	protected RobotInstructionSet robotInstructionSet;
 
 	public RobotInstructionSet getRobotInstructionSet() {
 		return robotInstructionSet;
 	}
 
-	public Robot() {
-		super();
+	public void setRobotInstructionSet(RobotInstructionSet robotInstructionSet) {
+		this.robotInstructionSet = robotInstructionSet;
 	}
 
 	public Robot(String name, State state, Position2D position,
 			Dynamics dynamics, List<Sensor> sensorList,
 			RobotInstructionSet robotInstructionSet) {
 		super(position, null);
+		this.robotInstructionSet = robotInstructionSet;
 		this.name = name;
 		this.state = state;
 		this.dynamics = dynamics;
 		this.sensorList = sensorList;
-		this.robotInstructionSet = robotInstructionSet;
 	}
 
 	public Dynamics getDynamics() throws Exception {
@@ -87,7 +86,7 @@ public abstract class Robot extends Object2D implements DecisionIntelligence,
 	public abstract double getCruiseLinearVelocity();
 
 	public abstract double getMaxLinearVelocity();
-	
+
 	public abstract double getMaxangularvelocity();
 
 	public abstract double getFrequency();

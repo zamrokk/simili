@@ -1,6 +1,6 @@
 package com.simili.khepera3;
 
-import com.simili.robot.command.RobotInstructionSet;
+import com.simili.robot.Robot;
 import com.simili.robot.position.Position2D;
 import com.simili.robot.sensor.Sensor;
 
@@ -30,17 +30,16 @@ public class K3ProximitySensor extends Sensor<Integer> {
 
 	public static final Integer maximumDistance = 3960;
 
-	public K3ProximitySensor(NAMES name, Integer angle,
-			RobotInstructionSet robotInstructionSet) {
-		super(name.toString(), robotInstructionSet);
+	public K3ProximitySensor(Robot robot, NAMES name, Integer angle) {
+		super(robot, name.toString());
 		// by default value is at max at starting
 		value = maximumDistance;
 	}
 
 	@Override
 	public Integer getNewValue() {
-		String outputResponse = robotInstructionSet.sendInstruction(
-				COMMAND.READ_IR, name);
+		String outputResponse = robot.getRobotInstructionSet().sendInstruction(
+				robot, COMMAND.READ_IR, name);
 		return outputResponse == null ? 0 : Integer.parseInt(outputResponse);
 	}
 

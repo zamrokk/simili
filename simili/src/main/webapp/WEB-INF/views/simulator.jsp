@@ -25,7 +25,7 @@
 </script>
 
 </head>
-<body onload="getRobot()">
+<body onload="getWorld()">
 	<h1>Simulator  (1square = 1m*1m)</h1>
 
 	<div style="display: none;">
@@ -75,14 +75,14 @@
 			});
 		}
 
-		function getRobot() {
+		function getWorld() {
 			jq(function() {
-				jq.post("./simulator/getRobot", function(data) {
+				jq.post("./simulator/getWorld", function(data) {
 refreshCanvas(data);
 refreshData(data);
 				});
 			});
-			setTimeout(getRobot, 100);
+			setTimeout(getWorld, 100);
 		}
 
 		function stop() {
@@ -128,25 +128,25 @@ refreshData(data);
 			//clear all
 			ctx.clearRect(0, 0, c.width, c.height);
 
-			var scale = 100; //object are 10 times less than normal but display 100 times bigger in px
+			var scale = 100; //objects are 10 times less than normal but display 100 times bigger in px
 
 			//grid
 			drawGrid();
 
 			//goal
 			ctx.fillStyle = "#FF0000";
-			ctx.fillRect(5 * scale - 5 + p, 5 * scale - 5 + p, 10, 10);
+			ctx.fillRect(data.robotList[0].goalPosition.x * scale - 5 + p, data.robotList[0].goalPosition.y * scale - 5 + p, 10, 10);
 
 			//robot
 			ctx.save();
 			var img = document.getElementById("robotImg");
 			
-			var x = data.centerPosition.x * scale + p;
-			var y = data.centerPosition.y * scale + p;
+			var x = data.robotList[0].centerPosition.x * scale + p;
+			var y = data.robotList[0].centerPosition.y * scale + p;
 
 			//center of the robot
 			ctx.translate(x, y);
-			ctx.rotate(data.centerPosition.theta);
+			ctx.rotate(data.robotList[0].centerPosition.theta);
 			ctx.drawImage(img,-13,-13);
 			ctx.restore();
 		}
@@ -154,13 +154,13 @@ refreshData(data);
 		function refreshData(data){
 			
 			jq(function() {
-			jq("#x").replaceWith('<span id="x">X = '+data.centerPosition.x+'</span>');
-			jq("#y").replaceWith('<span id="y">Y = '+data.centerPosition.y+'</span>');
-			jq("#theta").replaceWith('<span id="theta">Theta = '+data.centerPosition.theta+'</span>');
-			jq("#velocity").replaceWith('<span id="velocity">velocity = '+data.unicycleDriveState.v+'</span>');
-			jq("#angularVelocity").replaceWith('<span id="angularVelocity">angularVelocity = '+data.unicycleDriveState.w+'</span>');
-			jq("#v_right").replaceWith('<span id="v_right">v_right = '+data.state.v_right+'</span>');
-			jq("#v_left").replaceWith('<span id="v_left">v_left = '+data.state.v_left+'</span>');
+			jq("#x").replaceWith('<span id="x">X = '+data.robotList[0].centerPosition.x+'</span>');
+			jq("#y").replaceWith('<span id="y">Y = '+data.robotList[0].centerPosition.y+'</span>');
+			jq("#theta").replaceWith('<span id="theta">Theta = '+data.robotList[0].centerPosition.theta+'</span>');
+			jq("#velocity").replaceWith('<span id="velocity">velocity = '+data.robotList[0].unicycleDriveState.v+'</span>');
+			jq("#angularVelocity").replaceWith('<span id="angularVelocity">angularVelocity = '+data.robotList[0].unicycleDriveState.w+'</span>');
+			jq("#v_right").replaceWith('<span id="v_right">v_right = '+data.robotList[0].state.v_right+'</span>');
+			jq("#v_left").replaceWith('<span id="v_left">v_left = '+data.robotList[0].state.v_left+'</span>');
 
 			
 			});
