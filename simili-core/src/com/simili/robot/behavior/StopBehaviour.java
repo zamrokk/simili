@@ -7,7 +7,8 @@ import com.simili.robot.Robot;
 import com.simili.robot.state.State;
 import com.simili.robot.state.UnicycleDriveState;
 
-public class StopBehaviour implements Behavior {
+public class StopBehaviour<ROBOT extends Robot<?, ?,?>> implements
+		Behavior<ROBOT> {
 
 	private Logger log = LoggerFactory.getLogger(StopBehaviour.class);
 
@@ -21,7 +22,7 @@ public class StopBehaviour implements Behavior {
 	}
 
 	@Override
-	public State execute(Robot robot, State desiredState, double delta_t) {
+	public State execute(ROBOT robot, State desiredState, double delta_t) {
 		log.info(" *** Behavior " + getName() + " is stopping the robot");
 		return new UnicycleDriveState(0, 0);
 	}

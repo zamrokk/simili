@@ -4,20 +4,18 @@ import java.util.List;
 
 import com.simili.robot.Robot;
 
-public abstract class World {
+public abstract class World<ROBOT extends Robot<?, ?, ?>> {
 
-	
-
-	private List<Robot> robotList;
+	private List<ROBOT> robotList;
 
 	private List<Obstacle> obstacleList;
 
-	public World(List<Robot> robotList, List<Obstacle> obstacleList) {
+	public World(List<ROBOT> robotList, List<Obstacle> obstacleList) {
 		this.robotList = robotList;
 		this.obstacleList = obstacleList;
 	}
 
-	public List<Robot> getRobotList() {
+	public List<ROBOT> getRobotList() {
 		return robotList;
 	}
 
@@ -25,12 +23,12 @@ public abstract class World {
 		return obstacleList;
 	}
 
-	public void setRobotList(List<Robot> robotList) {
+	public void setRobotList(List<ROBOT> robotList) {
 		this.robotList = robotList;
 	}
 
 	public void setObstacleList(List<Obstacle> obstacleList) {
 		this.obstacleList = obstacleList;
 	}
-	
+
 }

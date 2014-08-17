@@ -9,12 +9,11 @@ import com.simili.robot.position.Position2D;
 import com.simili.robot.state.State;
 import com.simili.robot.state.UnicycleDriveState;
 
-public class GoToGoalBehavior implements Behavior {
+public class GoToGoalBehavior<ROBOT extends Robot<?,?,?>> implements Behavior<ROBOT> {
 
 	private final static Logger log = LoggerFactory
 			.getLogger(GoToGoalBehavior.class);
 	
-	private BEHAVIORS name;
 	private Position goalPosition;
 
 	// memory banks
@@ -27,7 +26,6 @@ public class GoToGoalBehavior implements Behavior {
 	public double Kd;
 
 	public GoToGoalBehavior(Position position) {
-		name = BEHAVIORS.GO_TO_GOAL;
 		this.goalPosition = position;
 		E_k = 0;
 		e_k_1 = 0;
@@ -38,7 +36,6 @@ public class GoToGoalBehavior implements Behavior {
 
 	public GoToGoalBehavior(Position2D goalPosition, double gainKp,
 			double gainKi, double gainKd) {
-		name = BEHAVIORS.GO_TO_GOAL;
 		this.goalPosition = goalPosition;
 		E_k = 0;
 		e_k_1 = 0;
@@ -49,14 +46,14 @@ public class GoToGoalBehavior implements Behavior {
 
 	@Override
 	public BEHAVIORS getName() {
-		return name;
+		return BEHAVIORS.GO_TO_GOAL;
 	}
 
 	@Override
-	public UnicycleDriveState execute(Robot robot,
+	public UnicycleDriveState execute(ROBOT robot,
 			State desiredState, double delta_t) {
 
-		log.info(" *** Behavior "+name+" is calculating new inputs ...");
+		log.info(" *** Behavior "+getName()+" is calculating new inputs ...");
 		
 		Position2D position_c = (Position2D) robot.getCenterPosition();
 		Position2D position_g = (Position2D) goalPosition;

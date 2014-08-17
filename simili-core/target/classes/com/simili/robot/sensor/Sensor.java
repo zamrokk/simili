@@ -1,12 +1,15 @@
 package com.simili.robot.sensor;
 
 import com.simili.robot.Robot;
+import com.simili.robot.position.Position;
 
-public abstract class Sensor<T> {
+public abstract class Sensor<ROBOT extends Robot<? extends ProximitySensor<ROBOT>, ? extends WheelEncoder<ROBOT>,?>, T> {
 
 	protected String name;
 
-	protected Robot robot;
+	protected ROBOT robot;
+
+	public Position position;
 
 	protected T value;
 
@@ -27,9 +30,10 @@ public abstract class Sensor<T> {
 	 */
 	public abstract T getLastValue();
 
-	public Sensor(Robot robot, String name) {
+	public Sensor(ROBOT robot, String name, Position position) {
 		this.name = name;
 		this.robot = robot;
+		this.position = position;
 	}
 
 	public String getName() {

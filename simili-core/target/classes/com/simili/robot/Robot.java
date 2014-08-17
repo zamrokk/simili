@@ -9,12 +9,14 @@ import com.simili.robot.command.RobotInstructionSet;
 import com.simili.robot.decision.DecisionIntelligence;
 import com.simili.robot.dynamics.Dynamics;
 import com.simili.robot.position.Position2D;
-import com.simili.robot.sensor.Sensor;
+import com.simili.robot.sensor.ProximitySensor;
+import com.simili.robot.sensor.WheelEncoder;
 import com.simili.robot.state.State;
 import com.simili.world.Object2D;
 
-public abstract class Robot extends Object2D implements DecisionIntelligence,
-		Serializable, Runnable {
+public abstract class Robot<PROXIMITY_SENSOR extends ProximitySensor<?>, WHEEL_ENCODER extends WheelEncoder<?>,INSTRUCTIONSET extends RobotInstructionSet<?,?>>
+		extends Object2D implements DecisionIntelligence, Serializable,
+		Runnable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,36 +26,41 @@ public abstract class Robot extends Object2D implements DecisionIntelligence,
 
 	protected Dynamics dynamics;
 
-	protected List<Sensor> sensorList;
+	protected List<PROXIMITY_SENSOR> proximitySensorList;
+
+	protected List<WHEEL_ENCODER> whellEncoderSensorList;
 
 	@JsonIgnore
-	protected RobotInstructionSet robotInstructionSet;
+	protected INSTRUCTIONSET robotInstructionSet;
 
-	public RobotInstructionSet getRobotInstructionSet() {
+	public INSTRUCTIONSET getRobotInstructionSet() {
 		return robotInstructionSet;
 	}
 
-	public void setRobotInstructionSet(RobotInstructionSet robotInstructionSet) {
+	public void setRobotInstructionSet(
+			INSTRUCTIONSET robotInstructionSet) {
 		this.robotInstructionSet = robotInstructionSet;
 	}
 
-	public Robot(String name, State state, Position2D position,
-			Dynamics dynamics, List<Sensor> sensorList,
-			RobotInstructionSet robotInstructionSet) {
-		super(position, null);
+	public Robot(
+			String name,
+			State state,
+			Position2D position,
+			Dynamics dynamics,
+			List<PROXIMITY_SENSOR> proximitySensorList,
+			List<WHEEL_ENCODER> whellEncoderSensorList,
+			INSTRUCTIONSET robotInstructionSet) {
+		super(position);
 		this.robotInstructionSet = robotInstructionSet;
 		this.name = name;
 		this.state = state;
 		this.dynamics = dynamics;
-		this.sensorList = sensorList;
+		this.proximitySensorList = proximitySensorList;
+		this.whellEncoderSensorList = whellEncoderSensorList;
 	}
 
 	public Dynamics getDynamics() throws Exception {
 		return dynamics;
-	}
-
-	public List<Sensor> getSensorList() {
-		return sensorList;
 	}
 
 	public State getState() throws Exception {
@@ -91,4 +98,11 @@ public abstract class Robot extends Object2D implements DecisionIntelligence,
 
 	public abstract double getFrequency();
 
+	public List<PROXIMITY_SENSOR> getProximitySensorList() {
+		return proximitySensorList;
+	}
+
+	public List<WHEEL_ENCODER> getWhellEncoderSensorList() {
+		return whellEncoderSensorList;
+	}
 }

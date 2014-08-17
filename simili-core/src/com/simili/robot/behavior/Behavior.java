@@ -1,13 +1,14 @@
 package com.simili.robot.behavior;
 
 import com.simili.robot.Robot;
-import com.simili.robot.position.Position;
 import com.simili.robot.state.State;
 
-public interface Behavior {
+public interface Behavior<ROBOT extends Robot<?, ?,?>> {
 
-	public enum BEHAVIORS{ GO_TO_GOAL , STOP };
-	
+	public enum BEHAVIORS {
+		GO_TO_GOAL, STOP, AVOID_OBSTACLE
+	};
+
 	public BEHAVIORS getName();
 
 	public void setPIDGains(double Kp, double Ki, double Kd);
@@ -24,7 +25,6 @@ public interface Behavior {
 	 * @param delta_t
 	 * @return
 	 */
-	public State execute(Robot robot,
-			State desiredState, double delta_t);
+	public State execute(ROBOT robot, State desiredState, double delta_t);
 
 }

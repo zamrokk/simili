@@ -1,0 +1,15 @@
+
+*** TODO URGENT ***
+- repair avoidObstacle and matrices
+- refactoring with UML
+- repair GoogleEngineTask Backend thread feature
+- 
+
+*** TASKS ***
+- install other uml tool like eUml2 ? for docs
+- install mylin for tasks ???
+- add new features Controllability checks + Eigen Values checks on GUI
+- dev followWalls
+- review video of Coursera for the robot
+- learn about AI / Drools, machine learning 
+- look ROS framework on hoovers

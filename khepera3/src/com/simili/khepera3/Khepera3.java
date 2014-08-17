@@ -10,10 +10,8 @@ import com.simili.robot.behavior.AvoidObstacleBehavior;
 import com.simili.robot.behavior.Behavior;
 import com.simili.robot.behavior.GoToGoalBehavior;
 import com.simili.robot.behavior.StopBehaviour;
-import com.simili.robot.command.RobotInstructionSet;
 import com.simili.robot.dynamics.DifferencialDriveDynamics;
 import com.simili.robot.position.Position2D;
-import com.simili.robot.sensor.Sensor;
 import com.simili.robot.state.DifferencialDriveState;
 import com.simili.robot.state.UnicycleDriveState;
 
@@ -25,7 +23,7 @@ import com.simili.robot.state.UnicycleDriveState;
  * 
  */
 
-public class Khepera3 extends Robot {
+public class Khepera3 extends Robot<K3ProximitySensor, K3WheelEncoder, K3RobotInstructionSet> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -66,12 +64,13 @@ public class Khepera3 extends Robot {
 
 	public Position2D goalPosition;
 
-	public Khepera3(RobotInstructionSet robotInstructionSet,
+	public Khepera3(K3RobotInstructionSet robotInstructionSet,
 			Position2D goalPosition) {
 		super("Khepera3", new DifferencialDriveState(),
 				new Position2D(0, 0, 0), new DifferencialDriveDynamics(
 						wheel_radius, wheel_base_length),
-				new ArrayList<Sensor>(), robotInstructionSet);
+				new ArrayList<K3ProximitySensor>(),
+				new ArrayList<K3WheelEncoder>(), robotInstructionSet);
 		this.goalPosition = goalPosition;
 
 		wheelEncoderR = new K3WheelEncoder(this, K3WheelEncoder.SIDES.RIGHT,
@@ -81,35 +80,44 @@ public class Khepera3 extends Robot {
 				K3WheelEncoder.SIDES.LEFT, wheel_radius, wheel_base_length,
 				ticks_per_rev);
 		proximitySensor128 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR128, 128);
+				K3ProximitySensor.NAMES.IR128, new Position2D(0, 0, new Double(
+						128) * Math.PI / 180));
 		proximitySensor75 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR75, 75);
+				K3ProximitySensor.NAMES.IR75, new Position2D(0, 0, new Double(
+						75) * Math.PI / 180));
 		proximitySensor42 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR42, 42);
+				K3ProximitySensor.NAMES.IR42, new Position2D(0, 0, new Double(
+						42) * Math.PI / 180));
 		proximitySensor13 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR13, 13);
+				K3ProximitySensor.NAMES.IR13, new Position2D(0, 0, new Double(
+						13) * Math.PI / 180));
 		proximitySensor_13 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR_13, -13);
+				K3ProximitySensor.NAMES.IR_13, new Position2D(0, 0, new Double(
+						-13) * Math.PI / 180));
 		proximitySensor_42 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR_42, -42);
+				K3ProximitySensor.NAMES.IR_42, new Position2D(0, 0, new Double(
+						-42) * Math.PI / 180));
 		proximitySensor_75 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR_75, -75);
+				K3ProximitySensor.NAMES.IR_75, new Position2D(0, 0, new Double(
+						-75) * Math.PI / 180));
 		proximitySensor_128 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR_128, -128);
+				K3ProximitySensor.NAMES.IR_128, new Position2D(0, 0,
+						new Double(-128) * Math.PI / 180));
 		proximitySensor_180 = new K3ProximitySensor(this,
-				K3ProximitySensor.NAMES.IR_180, -180);
+				K3ProximitySensor.NAMES.IR_180, new Position2D(0, 0,
+						new Double(-180) * Math.PI / 180));
 
-		sensorList.add(wheelEncoderR);
-		sensorList.add(wheelEncoderL);
-		sensorList.add(proximitySensor128);
-		sensorList.add(proximitySensor75);
-		sensorList.add(proximitySensor42);
-		sensorList.add(proximitySensor13);
-		sensorList.add(proximitySensor_13);
-		sensorList.add(proximitySensor_42);
-		sensorList.add(proximitySensor_75);
-		sensorList.add(proximitySensor_128);
-		sensorList.add(proximitySensor_180);
+		whellEncoderSensorList.add(wheelEncoderR);
+		whellEncoderSensorList.add(wheelEncoderL);
+		proximitySensorList.add(proximitySensor128);
+		proximitySensorList.add(proximitySensor75);
+		proximitySensorList.add(proximitySensor42);
+		proximitySensorList.add(proximitySensor13);
+		proximitySensorList.add(proximitySensor_13);
+		proximitySensorList.add(proximitySensor_42);
+		proximitySensorList.add(proximitySensor_75);
+		proximitySensorList.add(proximitySensor_128);
+		proximitySensorList.add(proximitySensor_180);
 
 		log.info("Sensors added.");
 
@@ -125,8 +133,10 @@ public class Khepera3 extends Robot {
 		// Get wheel encoder ticks from the robot
 		int right_ticks = wheelEncoderR.getNewValue();
 		int left_ticks = wheelEncoderL.getNewValue();
-		
-		log.debug("Get wheel encoder ticks from the robot. right_ticks="+right_ticks+"-prev="+prev_right_ticks+",left_ticks="+left_ticks+"-prev="+prev_left_ticks);
+
+		log.debug("Get wheel encoder ticks from the robot. right_ticks="
+				+ right_ticks + "-prev=" + prev_right_ticks + ",left_ticks="
+				+ left_ticks + "-prev=" + prev_left_ticks);
 
 		// Compute odometry here
 		double L = wheel_base_length;
@@ -140,14 +150,15 @@ public class Khepera3 extends Robot {
 		double d_left = r_left * wheel_radius;
 
 		double d_center = (d_right + d_left) / 2;
-		
-		log.debug("d_right="+d_right+"m,d_left="+d_left+"m");
+
+		log.debug("d_right=" + d_right + "m,d_left=" + d_left + "m");
 
 		double x_dt = d_center * Math.cos(((Position2D) centerPosition).theta);
 		double y_dt = d_center * Math.sin(((Position2D) centerPosition).theta);
 
 		double theta_dt = (r_right - r_left) / L; // rad
-		log.debug("x_dt="+x_dt+"m,y_dt="+y_dt+"m,theta_dt="+theta_dt+"rad");
+		log.debug("x_dt=" + x_dt + "m,y_dt=" + y_dt + "m,theta_dt=" + theta_dt
+				+ "rad");
 		double theta_new = Math.atan2(
 				Math.sin(((Position2D) centerPosition).theta + theta_dt),
 				Math.cos(((Position2D) centerPosition).theta + theta_dt));
@@ -171,6 +182,18 @@ public class Khepera3 extends Robot {
 		log.info("w_rigth=" + ((DifferencialDriveState) state).v_right
 				+ " rad/s,w_left=" + ((DifferencialDriveState) state).v_left
 				+ "rad/s");
+
+		// now refreshing for proximity sensors
+
+		proximitySensor128.getNewValue();
+		proximitySensor75.getNewValue();
+		proximitySensor42.getNewValue();
+		proximitySensor13.getNewValue();
+		proximitySensor_13.getNewValue();
+		proximitySensor_42.getNewValue();
+		proximitySensor_75.getNewValue();
+		proximitySensor_128.getNewValue();
+		proximitySensor_180.getNewValue();
 
 	}
 
@@ -221,19 +244,19 @@ public class Khepera3 extends Robot {
 
 	}
 
-	public Behavior chooseDecision() {
+	public Behavior<Khepera3> chooseDecision() {
 
-		Behavior behavior = null;
+		Behavior<Khepera3> behavior = null;
 
 		if (checkAtGoal(goalPosition)) {
-			behavior = new StopBehaviour();
+			behavior = new StopBehaviour<Khepera3>();
 		} else {
 			Position2D obstaclePosition = checkAtObstacle();
 			if (obstaclePosition != null) {
-				behavior = new AvoidObstacleBehavior(obstaclePosition);
+				behavior = new AvoidObstacleBehavior<Khepera3>(obstaclePosition);
 			} else {
-				behavior = new GoToGoalBehavior(goalPosition, gainKp, gainKi,
-						gainKd);
+				behavior = new GoToGoalBehavior<Khepera3>(goalPosition, gainKp,
+						gainKi, gainKd);
 			}
 		}
 
@@ -242,17 +265,15 @@ public class Khepera3 extends Robot {
 
 	private Position2D checkAtObstacle() {
 		Position2D obstaclePosition = null;
-		double mimumObstacleDistance = Double.MAX_VALUE;
-		for (Sensor sensor : sensorList) {
-			if (sensor instanceof K3ProximitySensor) {
-				K3ProximitySensor irps = (K3ProximitySensor) sensor;
-				if (irps.isSomethingAround()
-						&& irps.getDistancetoNearestObject() < mimumObstacleDistance) {
-					obstaclePosition = Position2D.addPositions(
-							irps.getRelativePositiontoNearestObject(),
-							(Position2D) centerPosition);
-				}
+		double minimumObstacleDistance = minimumDistanceToObject;
+		for (K3ProximitySensor sensor : proximitySensorList) {
+			if (sensor.isSomethingAround()
+					&& sensor.getDistancetoNearestObject() < minimumObstacleDistance) {
+				obstaclePosition = Position2D.addPositions(
+						sensor.getRelativePositiontoNearestObject(),
+						(Position2D) centerPosition);
 			}
+
 		}
 		return obstaclePosition;
 	}
@@ -278,15 +299,14 @@ public class Khepera3 extends Robot {
 
 		boolean obstaclefound = false;
 
-		for (Sensor sensor : sensorList) {
-			if (sensor instanceof K3ProximitySensor) {
-				K3ProximitySensor ps = (K3ProximitySensor) sensor;
-				if (ps.isSomethingAround()
-						&& (ps.getDistancetoNearestObject() < minimumDistanceToObject)) {
-					obstaclefound = true;
-					break;
-				}
+		for (K3ProximitySensor sensor : proximitySensorList) {
+
+			if (sensor.isSomethingAround()
+					&& (sensor.getDistancetoNearestObject() < minimumDistanceToObject)) {
+				obstaclefound = true;
+				break;
 			}
+
 		}
 
 		return obstaclefound;

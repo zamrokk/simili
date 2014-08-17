@@ -7,12 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.simili.khepera3.K3Command;
+import com.simili.khepera3.K3ProximitySensor;
 import com.simili.khepera3.K3RobotInstructionSet;
 import com.simili.khepera3.K3WheelEncoder;
-import com.simili.robot.Robot;
-import com.simili.robot.command.Command;
-import com.simili.robot.sensor.Sensor;
+import com.simili.khepera3.Khepera3;
 import com.simili.service.Simulator;
+import com.simili.world.Obstacle;
+import com.simili.world.Obstacle2D;
 import com.simili.world.World;
 
 public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
@@ -22,12 +23,13 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 
 	@JsonIgnore
 	@Inject
-	private Simulator simulator;
+	private Simulator<Khepera3> simulator;
 
 	@Override
-	public String sendInstruction(Robot robot,Command command, String... arguments) {
+	public String sendInstruction(Khepera3 robot, K3Command command,
+			String... arguments) {
 
-		World world = simulator.getWorld();
+		World<Khepera3> world = simulator.getWorld();
 
 		String argumentsTxt = "";
 		for (String string : arguments) {
@@ -46,18 +48,17 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 			double realVelocityApplied = 0;
 			try {
 				// search for correct encoder
-				for (Sensor sensor : robot.getSensorList()) {
-					if (sensor instanceof K3WheelEncoder
-							&& ((K3WheelEncoder) (sensor)).getName().equals(
-									side)) {
-						K3WheelEncoder kwe = (K3WheelEncoder) sensor;
+				for (K3WheelEncoder sensor : robot.getWhellEncoderSensorList()) {
+					if (sensor.getName().equals(side)) {
+
 						realVelocityApplied = newV
 								* (1 - Math.pow(
-										(Math.abs(kwe.getLastAngularVelocity()
+										(Math.abs(sensor
+												.getLastAngularVelocity()
 												- newV) / (2 * robot
 												.getMaxangularvelocity())), 2))
 								* 0.8;
-						kwe.updateTicks(realVelocityApplied,
+						sensor.updateTicks(realVelocityApplied,
 								robot.getFrequency());
 					}
 				}
@@ -72,9 +73,49 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 		}
 		case READ_IR: {
 			String name = arguments[0];
-			// TODO ... for obstacle
-			log.debug(" *** TO IMPLEMENT *** MOCK has detected obstacle for IR sensor "
-					+ name);
+
+			for (K3ProximitySensor sensor : robot.getProximitySensorList()) {
+				if (sensor.getName().equals(name)) {
+					// check for each obstacle if someone is close
+					for (Obstacle obstacle : world.getObstacleList()) {
+						Obstacle2D o = (Obstacle2D) obstacle;
+						double x = Math.abs(o.getCenterPosition().x
+								- robot.getCenterPosition().x)
+								- o.radius;
+						double y = Math.abs(o.getCenterPosition().y
+								- robot.getCenterPosition().y)
+								- o.radius;
+						double distance = Math.hypot(x, y);
+
+						double perfectAngle = Math.atan2(y, x);
+						double actualAngle = 0; /*
+												 * FIXME
+												 * robot.getCenterPosition(
+												 * ).theta + kps.getAngle();
+												 */
+						actualAngle = Math.atan2(Math.sin(actualAngle),
+								Math.cos(actualAngle));
+						// correction reduced in fonction of the position of the
+						// sensor [0% -100%]
+						distance = correctDistanceFromAngle(distance,
+								perfectAngle, actualAngle);
+
+						int newValue = K3ProximitySensor
+								.convertDistance2Value(distance);
+
+						// get closest obstacle distance
+						if (newValue > sensor.getLastValue()) {
+							sensor.updateDistanceValue(newValue);
+
+							log.debug("MOCK has updated proximity sensor "
+									+ name + " with value : " + newValue);
+						}
+
+					}
+
+				}
+			}
+
 			break;
 		}
 		case READ_TICKS: {
@@ -82,11 +123,10 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 			String side = arguments[0];
 			// add new perfect ticks on last velocity
 
-			for (Sensor sensor : robot.getSensorList()) {
-				if (sensor instanceof K3WheelEncoder
-						&& ((K3WheelEncoder) sensor).getName().equals(side)) {
+			for (K3WheelEncoder sensor : robot.getWhellEncoderSensorList()) {
+				if (sensor.getName().equals(side)) {
 
-					output = "" + ((K3WheelEncoder) sensor).currentTick;
+					output = "" + sensor.currentTick;
 					log.debug("MOCK has returned from " + side
 							+ " wheel ticks : " + output);
 				}
@@ -97,6 +137,24 @@ public class K3RobotInstructionSetMOCK extends K3RobotInstructionSet {
 		}
 
 		return output;
+	}
+
+	/**
+	 * Reduce distance in function of the REAL angle of the sensor. I use power
+	 * 4 factor to increase difference
+	 * 
+	 * @param distance
+	 *            the perfect distance to the obstacle
+	 * @param perfectAngle
+	 *            the perfect angle to the obstacle
+	 * @param actualAngle
+	 *            the angle of the sensor
+	 * @return Return the reduced distance
+	 */
+	private double correctDistanceFromAngle(double distance,
+			double perfectAngle, double actualAngle) {
+		double difference = Math.abs(perfectAngle - actualAngle) / Math.PI;
+		return Math.pow(difference, 4) * distance;
 	}
 
 }

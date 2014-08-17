@@ -15,7 +15,7 @@ import com.simili.world.World;
 import com.simili.world.World2D;
 
 @Configuration
-public class Simulator {
+public class Simulator<ROBOT extends Robot<?,?,?>> {
 
 	private static final Logger log = LoggerFactory.getLogger(Simulator.class);
 
@@ -23,7 +23,7 @@ public class Simulator {
 
 	public boolean isAlive;
 
-	private World world;
+	private World<ROBOT> world;
 
 	private Timestamp elapseTime;
 
@@ -45,7 +45,7 @@ public class Simulator {
 		clear();
 	}
 
-	public Simulator(World world) {
+	public Simulator(World<ROBOT> world) {
 		this.world = world;
 	}
 
@@ -57,7 +57,7 @@ public class Simulator {
 			
 			log.info("Simulator is starting ...");
 			
-			for (Robot robot : world.getRobotList()) {
+			for (ROBOT robot : world.getRobotList()) {
 				Thread robotThread = threadFactoryWrapper
 						.newRequestThread(robot);
 				threadList.add(robotThread);
@@ -85,16 +85,16 @@ public class Simulator {
 		return elapseTime;
 	}
 	
-	public World getWorld() {
+	public World<ROBOT> getWorld() {
 		return world;
 	}
 
-	public void setWorld(World world) {
+	public void setWorld(World<ROBOT> world) {
 		this.world = world;
 	}
 
 	public void clear() {
-		this.world = new World2D(null, null);
+		this.world = new World2D<ROBOT>(null, null);
 	}
 
 }

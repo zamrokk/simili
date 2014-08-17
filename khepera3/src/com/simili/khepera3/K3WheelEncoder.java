@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.simili.robot.Robot;
-import com.simili.robot.sensor.Sensor;
+import com.simili.robot.sensor.WheelEncoder;
 
-public class K3WheelEncoder extends Sensor<Integer> {
+public class K3WheelEncoder extends WheelEncoder<Khepera3> {
 
 	private Logger log = LoggerFactory.getLogger(K3WheelEncoder.class);
 
@@ -35,9 +35,9 @@ public class K3WheelEncoder extends Sensor<Integer> {
 	// last angularVelocity
 	public double lastAngularVelocity;
 
-	public K3WheelEncoder(Robot robot, SIDES name, SIDES side,
+	public K3WheelEncoder(Khepera3 robot, SIDES name, SIDES side,
 			double wheel_radius, double wheel_base_length, int ticks_per_rev) {
-		super(robot, name.name());
+		super(robot, name.name(), null); // TODO put real position
 		lastTick = 0;
 		currentTick = 0;
 		this.wheel_radius = wheel_radius;
@@ -113,7 +113,7 @@ public class K3WheelEncoder extends Sensor<Integer> {
 	public void updateTicks(double velocity, double delta_t) {
 		lastTick = currentTick;
 		currentTick += distance2ticks(velocity * delta_t);
-		log.debug(name + " tick updated from "+lastTick+ "to " + currentTick
+		log.debug(name + " tick updated from " + lastTick + "to " + currentTick
 				+ " for effective speed of " + velocity + " rad/s");
 		this.lastAngularVelocity = velocity;
 	}

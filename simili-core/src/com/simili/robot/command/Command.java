@@ -1,5 +1,7 @@
 package com.simili.robot.command;
 
-public interface Command {
+import com.simili.robot.Robot;
+
+public interface Command<ROBOT extends Robot<?,?,?>> {
 
 }
